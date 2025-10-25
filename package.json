@@ -1,0 +1,24 @@
+{
+  "name": "hirelink-backend",
+  "version": "1.0.0",
+  "description": "Coming soon...",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linanagm/HireLink-Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/linanagm/HireLink-Backend/issues"
+  },
+  "homepage": "https://github.com/linanagm/HireLink-Backend#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
