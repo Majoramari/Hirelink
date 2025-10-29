@@ -1,23 +1,19 @@
-import authRouter from "./Controllers/auth.controller.js";
-import userRouter from "./Controllers/user.controller.js";
-import adminRouter from "./Controllers/admin.controller.js";
-import companyRouter from "./Controllers/Company.controller.js";
-
+import authRouter from "./Routes/auth.routes.js";
+import userRouter from "./Routes/user.routes.js";
+import adminRouter from "./Routes/admin.routes.js";
+import companyRouter from "./Routes/company.routes.js";
+import { globalErrorHandler } from "./Utils/errorHandling.utils.js";
 import dotenv from "dotenv";
 dotenv.config();
 import prisma , { connectDB } from "../prisma/client.js";
 
-
-//import connectDB from "./DB/connection.js";
-import { globalErrorHanndler } from "./Utils/errorHandling.utils.js";
-
 const bootstrap = async (app , express) => {
     
-    dotenv.config();
+    //dotenv.config();
     app.use(express.json());
 
     //connect to database
-    connectDB();
+    await connectDB();
     
     //routes
     app.use("/api/auth" , authRouter);
@@ -27,13 +23,13 @@ const bootstrap = async (app , express) => {
 
    
     //404 error not found
-    app.all("/*dummy" , (req , res, next) => {
+    app.all("/*" , (req , res, next) => {
       return next(new Error("Not Found Handler!!", {cause : 404}));
         
     });
     
     //global error handler middleware
-    app.use(globalErrorHanndler);
+    app.use(globalErrorHandler);
 
 }
 

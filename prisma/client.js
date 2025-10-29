@@ -4,7 +4,7 @@ dotenv.config(); // لازم يكون فوق أي import لل PrismaClient
 
 //import { PrismaClient } from "@prisma/client";
 
-import { PrismaClient } from "../src/generated/prisma/client.ts"; // أو default.js حسب الملف اللي اتولد
+import { PrismaClient } from "../src/generated/prisma/client.js"; // أو default.js حسب الملف اللي اتولد
 
 const prisma = new PrismaClient();
 

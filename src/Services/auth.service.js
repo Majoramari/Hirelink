@@ -1,20 +1,18 @@
-import { PrismaClient } from "@prisma/client";
-import { successResponse } from "../Utils/successResponse.utils.js";
 import { hash } from "../Utils/hash.utils.js";
-
 import prisma from "../../prisma/client.js";
+import { generateToken } from "../Utils/jwt.utils.js";
 
 
 
 
-export const userSignup = async (req , res, next) => {
-
-    //parse data from the body
-    const {name, email, password, phone, role, isActive, emailVerified} = req.body;
+export const userRegister= async ({name, email, password, phone, role}) => { //هبعت ال req.body في controller
+    
+    const userIsExist = await prisma.user.findUnique({where : {email}});
 
     //check if email is already exist
-    if(await prisma.user.findUnique({where : {email}})){
-        return next(new Error("Email already exist", {cause : 409})); //409 = conflict => dublicated entry in db
+    if(userIsExist){
+        throw { message: "Email already exist", statusCode: 409 }; // throw object مع statusCode
+
     };
 
 
@@ -24,36 +22,32 @@ export const userSignup = async (req , res, next) => {
     //create user object & and add to the database    
     const newUser = await prisma.user.create(
         {
-            data : 
-            { 
-            name,
-            email, 
-            password: hashedPassword,
-            phone, 
-            role, 
-            isActive: isActive ?? true, //default active 
-            emailVerified: emailVerified ?? false //default not verified
-        },
+            data : { name, email, password: hashedPassword, phone, role},
         select: {
             id: true,
             name: true,
             email: true,
             phone: true,
             role: true,
+            createdAt: true,
             isActive: true,
             emailVerified: true
+
+
         },
     
     });
-
-    //send success response
-    return successResponse({
-        res, 
-        statusCode : 201, 
-        message : "User created successfully",
-        data : newUser
+    //generate Token
+    const token = generateToken({ 
+        id: newUser.id, 
+        role: newUser.role 
     });
 
+
+    return {
+        user : newUser,
+        token
+    };
 
 };
 

@@ -1,10 +1,11 @@
 
-export const globalErrorHanndler = (err, req, res, next) => {
-    const status = err.cause || 500;
+export const globalErrorHandler = (err, req, res, next) => {
+    const status = err.statusCode ||err.cause || 500;
+    const message = err.message || "Something went wrong";
       return res
       .status(status)
       .json({
-        message : "Something went wrong",
+        message,
         error : err.message,
         stack : err.stack
       });
