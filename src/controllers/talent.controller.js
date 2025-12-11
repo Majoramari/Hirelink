@@ -19,3 +19,28 @@ export async function updateProfile(req, res) {
 		data: result.payload,
 	});
 }
+
+export async function updateFile(req, res) {
+	const result = await talentService.updateFile(
+		req.file.fieldname,
+		req.user.id,
+		req.file,
+	);
+
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
+}
+
