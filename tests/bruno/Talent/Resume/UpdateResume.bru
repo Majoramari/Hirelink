@@ -1,0 +1,36 @@
+meta {
+  name: UpdateResume
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{base_url}}/talent/resume
+  body: multipartForm
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
+body:json {
+  {
+    "headline": "a headline for testing",
+    "bio": "I love coding",
+    "location": "Planet earth"
+  }
+}
+
+body:multipart-form {
+  resume: @file(/home/majoramari/Downloads/malak_mesh_masla7a.pdf)
+}
+
+body:file {
+  file: @file(/home/majoramari/Downloads/1.png) @contentType(image/png)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

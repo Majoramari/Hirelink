@@ -1,0 +1,36 @@
+meta {
+  name: GetResume
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/talent/resume
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
+body:json {
+  {
+    "headline": "a headline for testing",
+    "bio": "I love coding",
+    "location": "Planet earth"
+  }
+}
+
+body:multipart-form {
+  avatar: @file(/home/majoramari/Downloads/1.png)
+}
+
+body:file {
+  file: @file(/home/majoramari/Downloads/1.png) @contentType(image/png)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
