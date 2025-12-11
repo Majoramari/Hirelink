@@ -122,7 +122,7 @@ export async function login(email, password) {
 	if (!user) {
 		return result({
 			ok: false,
-			status: statusCodes.UNAUTHORIZED,
+			statusCode: statusCodes.UNAUTHORIZED,
 			message: "invalid credentials",
 		});
 	}
@@ -216,7 +216,7 @@ export async function getCurrent(userId) {
 	if (!user) {
 		return result({
 			ok: false,
-			status: statusCodes.UNAUTHORIZED,
+			statusCode: statusCodes.UNAUTHORIZED,
 			message: "user not found",
 		});
 	}
