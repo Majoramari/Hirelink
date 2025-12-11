@@ -1,0 +1,30 @@
+meta {
+  name: UpdateProfile
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{base_url}}/talent/profile
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+}
+
+body:json {
+  {
+    "headline": "a headline for testing",
+    "bio": "I love coding",
+    "location": "Planet earth",
+    "avatarUrl": "https://example.com/png",
+    "resumeUrl": "https://example.com/png"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
