@@ -1,3 +1,21 @@
+/**
+ * Cloudinary configuration.
+ *
+ * Initializes Cloudinary and exposes Multer CloudinaryStorage instances used by
+ * upload middleware for avatars/logos and resumes.
+ *
+ * Notes:
+ * - Images use Cloudinary's standard image pipeline (resource_type defaults to image).
+ * - Resumes are uploaded as `raw` files and forced to `pdf` format.
+ * - Storage configuration is kept here so middleware/routes don't need to know Cloudinary details.
+ *
+ * References:
+ * - Cloudinary Node SDK: https://cloudinary.com/documentation/node_integration
+ * - multer-storage-cloudinary: https://github.com/affanshahid/multer-storage-cloudinary
+ * - Multer: https://github.com/expressjs/multer
+ * - Enable PDF and ZIP file delivery: https://support.cloudinary.com/hc/en-us/articles/20970529312146-How-to-Upload-Manage-and-Deliver-PDF-Files
+ */
+
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import env from "./env.js";
@@ -8,6 +26,9 @@ cloudinary.config({
 	api_secret: env.CLOUDINARY_API_SECRET,
 });
 
+/**
+ * CloudinaryStorage for image uploads (avatars/logos).
+ */
 const avatarStorage = new CloudinaryStorage({
 	cloudinary,
 	params: {
@@ -16,6 +37,9 @@ const avatarStorage = new CloudinaryStorage({
 	},
 });
 
+/**
+ * CloudinaryStorage for raw uploads (PDF resumes).
+ */
 const resumeStorage = new CloudinaryStorage({
 	cloudinary,
 	params: {
