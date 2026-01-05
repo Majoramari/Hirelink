@@ -2,13 +2,13 @@
  * Creates and configures the Express application:
  * - applies global middleware
  * - mounts API routes
- * - installs 404 and error-handling middleware
+ * - adds 404 and error-handling middleware
  *
- * Middleware order matters:
+ * Middleware order is important:
  * - global middleware first (security, parsing, cors)
  * - routes next
  * - 404 handler after routes
- * - error handler last (Express only forwards to error middleware if it has 4 args)
+ * - error handler last (Express forwards errors only to middleware with 4 arguments)
  *
  * References:
  * - Express error handling: https://expressjs.com/en/guide/error-handling.html
@@ -24,16 +24,16 @@ import routes from "./routes/index.js";
 
 const app = express();
 
-// Apply middleware
+// Apply global middleware
 applyGlobalMiddleware(app);
 
-// Setup routes
+// Set up routes
 app.use(`/api/${env.API_VERSION}`, routes);
 
-// 404 not found
+// Handle 404 (not found)
 app.use(NotFoundMiddleware);
 
-// Error handler
+// Handle errors
 app.use(errorHandler);
 
 export default app;
