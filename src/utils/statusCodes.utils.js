@@ -1,3 +1,10 @@
+/**
+ * HTTP status code constants.
+ *
+ * Reference:
+ * - MDN HTTP status codes: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+ */
+
 const STATUS_CODES = {
 	OK: 200,
 	CREATED: 201,
