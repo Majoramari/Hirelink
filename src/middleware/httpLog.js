@@ -1,4 +1,18 @@
-import chalk from "chalk"; // if you picked the easy option, remove this from package.json
+/**
+ * Development-only HTTP request logging.
+ *
+ * Wraps Morgan and pipes output into the application logger.
+ *
+ * Notes:
+ * - This middleware is enabled only in non-production environments.
+ * - It is designed for local debugging and should not be treated as an audit log.
+ *
+ * References:
+ * - Morgan: https://github.com/expressjs/morgan
+ * - Pino: https://getpino.io/
+ */
+
+import chalk from "chalk"; // If you chose the simple setup without colored logs, remove this from package.json.
 import morgan from "morgan";
 import logger from "../lib/logger.js";
 
