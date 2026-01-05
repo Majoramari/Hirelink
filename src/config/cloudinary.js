@@ -2,12 +2,12 @@
  * Cloudinary configuration.
  *
  * Initializes Cloudinary and exposes Multer CloudinaryStorage instances used by
- * upload middleware for avatars/logos and resumes.
+ * the upload middleware for avatars/logos and resumes.
  *
  * Notes:
- * - Images use Cloudinary's standard image pipeline (resource_type defaults to image).
+ * - Images use Cloudinary's default image handling (resource_type defaults to image).
  * - Resumes are uploaded as `raw` files and forced to `pdf` format.
- * - Storage configuration is kept here so middleware/routes don't need to know Cloudinary details.
+ * - Storage settings are kept here so middleware/routes do not need Cloudinary details.
  *
  * References:
  * - Cloudinary Node SDK: https://cloudinary.com/documentation/node_integration
