@@ -113,3 +113,33 @@ export const updateJobSchema = z
 			.describe("The required languages for the job"),
 	})
 	.strict();
+
+/**
+ * Zod schema for submitting an application to a job.
+ */
+export const applyToJobSchema = z
+	.object({
+		coverLetter: z
+			.string()
+			.min(1)
+			.optional()
+			.describe("A cover letter submitted with the application"),
+		resumeUrl: z
+			.url()
+			.optional()
+			.describe("A URL to the applicant's resume"),
+	})
+	.strict();
+
+/**
+ * Zod schema for updating an application status.
+ */
+export const updateApplicationStatusSchema = z
+	.object({
+		status: z
+			.enum(["APPLIED", "REJECTED", "HIRED"], {
+				errorMap: () => ({ message: "invalid status" }),
+			})
+			.describe("The new status for the application"),
+	})
+	.strict();
