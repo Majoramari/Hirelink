@@ -1,12 +1,11 @@
 /**
  * Prisma CLI configuration (Prisma 7+).
  *
- * Prisma 7 moved several configuration concerns out of `schema.prisma` and into
- * `prisma.config.ts` (notably datasource URL wiring and seeding command).
+ * Prisma 7 moved several configuration concerns out of schema.prisma and into prisma.config.ts
  *
  * References:
- * - Prisma configuration: https://www.prisma.io/docs/orm/prisma-schema/overview/prisma-config
- * - Migrate advisory locking: https://pris.ly/d/migrate-advisory-locking
+ * - Prisma configuration: https://www.prisma.io/docs/orm/reference/prisma-config-reference
+ * - Migrate advisory locking: https://www.prisma.io/docs/orm/more/upgrade-guides/upgrading-versions/upgrading-to-prisma-7
  */
 
 import "dotenv/config";

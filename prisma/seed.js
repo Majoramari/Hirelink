@@ -3,22 +3,21 @@
  *
  * Responsibilities:
  * - Creates predictable development data (users, profiles, skills/languages, jobs, applications).
- * - Is designed to be idempotent where possible (re-running should update/ensure data rather than duplicating it).
+ * - Tries to be safe to run more than once (re-running should update or ensure data instead of duplicating it).
  *
- * Safety notes:
- * - Seeding is a destructive operation in the sense that it can overwrite dev credentials.
- * - Do not run this against production unless you explicitly intend to.
- *
- * Prisma 7 notes:
- * - Prisma 7 reads the seed command from `prisma.config.ts` (`migrations.seed`).
+ * Notes:
+ * - Seeding can overwrite development credentials.
+ * - Seeding enforces role/profile invariants by removing conflicting profiles for the seeded users.
+ * - Do not run this in production unless you really mean to.
+ * - Prisma 7 reads the seed command from prisma.config.ts (migrations.seed).
  *
  * References:
  * - Prisma seeding: https://www.prisma.io/docs/orm/prisma-migrate/workflows/seeding
- * - Prisma config: https://www.prisma.io/docs/orm/prisma-schema/overview/prisma-config
+ * - Prisma configuration: https://www.prisma.io/docs/orm/reference/prisma-config-reference
  */
 
-import bcrypt from "bcrypt";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcrypt";
 import { PrismaClient } from "../src/generated/prisma/client.ts";
 import { generateUlid } from "../src/utils/general.utils.js";
 import {
@@ -56,7 +55,11 @@ async function main() {
 
 		return prisma.skill.upsert({
 			where: { name: displayName },
-			create: { id: generateUlid(), name: displayName, normalizedName: key || null },
+			create: {
+				id: generateUlid(),
+				name: displayName,
+				normalizedName: key || null,
+			},
 			update: { normalizedName: key || null },
 			select: { id: true, name: true, normalizedName: true },
 		});
@@ -82,7 +85,11 @@ async function main() {
 
 		return prisma.language.upsert({
 			where: { name: displayName },
-			create: { id: generateUlid(), name: displayName, normalizedName: key || null },
+			create: {
+				id: generateUlid(),
+				name: displayName,
+				normalizedName: key || null,
+			},
 			update: { normalizedName: key || null },
 			select: { id: true, name: true, normalizedName: true },
 		});
@@ -95,14 +102,16 @@ async function main() {
 		});
 		for (const s of skills) {
 			const key = normalizedNameKey(s.name);
-			if (!key) continue;
+			if (!key) {
+				continue;
+			}
 			try {
 				await prisma.skill.update({
 					where: { id: s.id },
 					data: { normalizedName: key },
 				});
 			} catch (_e) {
-				// Likely a unique conflict if duplicates exist; keep existing canonical row.
+				// Skip, unique conflict because duplicates exist.
 			}
 		}
 
@@ -112,14 +121,16 @@ async function main() {
 		});
 		for (const l of languages) {
 			const key = normalizedNameKey(l.name);
-			if (!key) continue;
+			if (!key) {
+				continue;
+			}
 			try {
 				await prisma.language.update({
 					where: { id: l.id },
 					data: { normalizedName: key },
 				});
 			} catch (_e) {
-				// Likely a unique conflict if duplicates exist; keep existing canonical row.
+				// Skip, unique conflict because duplicates exist.
 			}
 		}
 	}
@@ -127,7 +138,12 @@ async function main() {
 	async function upsertUserWithRole({ email, password, role, profileData }) {
 		const existing = await prisma.user.findUnique({
 			where: { email },
-			select: { id: true, role: true },
+			select: {
+				id: true,
+				role: true,
+				talentProfile: { select: { id: true } },
+				employerProfile: { select: { id: true } },
+			},
 		});
 
 		if (existing && existing.role !== role) {
@@ -150,23 +166,23 @@ async function main() {
 				verificationExpiresAt: null,
 				...(role === "TALENT"
 					? {
-						talentProfile: {
-							create: {
-								id: generateUlid(),
-								...profileData,
+							talentProfile: {
+								create: {
+									id: generateUlid(),
+									...profileData,
+								},
 							},
-						},
-					}
+						}
 					: {}),
 				...(role === "EMPLOYER"
 					? {
-						employerProfile: {
-							create: {
-								id: generateUlid(),
-								...profileData,
+							employerProfile: {
+								create: {
+									id: generateUlid(),
+									...profileData,
+								},
 							},
-						},
-					}
+						}
 					: {}),
 			},
 			update: {
@@ -176,39 +192,65 @@ async function main() {
 				isEmailVerified: true,
 				verificationToken: null,
 				verificationExpiresAt: null,
+				...(role === "MODERATOR"
+					? {
+							talentProfile: { delete: true },
+							employerProfile: { delete: true },
+						}
+					: {}),
 				...(role === "TALENT"
 					? {
-						talentProfile: {
-							upsert: {
-								create: { id: generateUlid(), ...profileData },
-								update: { ...profileData },
+							talentProfile: {
+								upsert: {
+									create: { id: generateUlid(), ...profileData },
+									update: { ...profileData },
+								},
 							},
-						},
-					}
+							employerProfile: { delete: true },
+						}
 					: {}),
 				...(role === "EMPLOYER"
 					? {
-						employerProfile: {
-							upsert: {
-								create: { id: generateUlid(), ...profileData },
-								update: { ...profileData },
+							employerProfile: {
+								upsert: {
+									create: { id: generateUlid(), ...profileData },
+									update: { ...profileData },
+								},
 							},
-						},
-					}
+							talentProfile: { delete: true },
+						}
 					: {}),
 			},
 			select: { id: true, email: true, role: true },
 		});
 
+		// Ensure create path also respects invariant (especially if DB already has an opposite profile).
+		if (role === "TALENT") {
+			await prisma.employer.deleteMany({ where: { userId: user.id } });
+		}
+		if (role === "EMPLOYER") {
+			await prisma.talent.deleteMany({ where: { userId: user.id } });
+		}
+		if (role === "MODERATOR") {
+			await prisma.talent.deleteMany({ where: { userId: user.id } });
+			await prisma.employer.deleteMany({ where: { userId: user.id } });
+		}
+
 		return user;
 	}
 
-	async function setTalentSkillsAndLanguages({ talentUserId, skills, languages }) {
+	async function setTalentSkillsAndLanguages({
+		talentUserId,
+		skills,
+		languages,
+	}) {
 		const talent = await prisma.talent.findUnique({
 			where: { userId: talentUserId },
 			select: { id: true },
 		});
-		if (!talent) return;
+		if (!talent) {
+			return;
+		}
 
 		await prisma.$transaction(async (tx) => {
 			await tx.talentSkill.deleteMany({ where: { talentId: talent.id } });
@@ -267,22 +309,22 @@ async function main() {
 					salary,
 					requiredSkills: requiredSkills.length
 						? {
-							create: requiredSkills.map((s) => ({
-								id: generateUlid(),
-								skillId: s.skillId,
-								required: s.required,
-							})),
-						}
+								create: requiredSkills.map((s) => ({
+									id: generateUlid(),
+									skillId: s.skillId,
+									required: s.required,
+								})),
+							}
 						: undefined,
 					requiredLanguages: requiredLanguages.length
 						? {
-							create: requiredLanguages.map((l) => ({
-								id: generateUlid(),
-								languageId: l.languageId,
-								minimumProficiency: l.minimumProficiency,
-								required: l.required,
-							})),
-						}
+								create: requiredLanguages.map((l) => ({
+									id: generateUlid(),
+									languageId: l.languageId,
+									minimumProficiency: l.minimumProficiency,
+									required: l.required,
+								})),
+							}
 						: undefined,
 				},
 				select: { id: true },
@@ -336,11 +378,14 @@ async function main() {
 	async function seedModerator() {
 		const isProd = process.env.NODE_ENV === "production";
 		const email =
-			process.env.MODERATOR_EMAIL || (isProd ? undefined : "moderator@hirelink.com");
+			process.env.MODERATOR_EMAIL ||
+			(isProd ? undefined : "moderator@hirelink.com");
 		const password =
-			process.env.MODERATOR_PASSWORD || (isProd ? undefined : "p@ssword");
+			process.env.MODERATOR_PASSWORD || (isProd ? undefined : "@dm!n");
 		if (!email || !password) {
-			console.log("MODERATOR_EMAIL/MODERATOR_PASSWORD not set. Skipping moderator seed.");
+			console.log(
+				"MODERATOR_EMAIL/MODERATOR_PASSWORD not set. Skipping moderator seed.",
+			);
 			return;
 		}
 
@@ -377,7 +422,7 @@ async function main() {
 				verificationExpiresAt: null,
 			},
 		});
-		console.log(`Seeded/updated moderator user: ${email}`);
+		console.log(`Seeded moderator user: ${email}`);
 	}
 
 	await seedModerator();
@@ -402,7 +447,7 @@ async function main() {
 	function requireSkill(name) {
 		const skill = skillByName.get(name);
 		if (!skill) {
-			throw new Error(`Seed invariant failed: missing skill '${name}'`);
+			throw new Error(`Seed failed: missing skill '${name}'`);
 		}
 		return skill;
 	}
@@ -410,7 +455,7 @@ async function main() {
 	function requireLanguage(name) {
 		const language = languageByName.get(name);
 		if (!language) {
-			throw new Error(`Seed invariant failed: missing language '${name}'`);
+			throw new Error(`Seed failed: missing language '${name}'`);
 		}
 		return language;
 	}
@@ -482,7 +527,9 @@ async function main() {
 			{ skillId: requireSkill("React").id, level: "INTERMEDIATE" },
 			{ skillId: requireSkill("TypeScript").id, level: "INTERMEDIATE" },
 		],
-		languages: [{ languageId: requireLanguage("English").id, proficiency: "ADVANCED" }],
+		languages: [
+			{ languageId: requireLanguage("English").id, proficiency: "ADVANCED" },
+		],
 	});
 
 	const employerProfile1 = await prisma.employer.findUnique({
@@ -574,7 +621,9 @@ async function main() {
 	});
 
 	await prisma.application.upsert({
-		where: { jobId_talentId: { jobId: backendJobId, talentId: talentProfile1.id } },
+		where: {
+			jobId_talentId: { jobId: backendJobId, talentId: talentProfile1.id },
+		},
 		create: {
 			id: generateUlid(),
 			jobId: backendJobId,
@@ -588,7 +637,9 @@ async function main() {
 	});
 
 	await prisma.application.upsert({
-		where: { jobId_talentId: { jobId: backendJobId, talentId: talentProfile2.id } },
+		where: {
+			jobId_talentId: { jobId: backendJobId, talentId: talentProfile2.id },
+		},
 		create: {
 			id: generateUlid(),
 			jobId: backendJobId,
@@ -602,8 +653,12 @@ async function main() {
 	});
 
 	console.log("Seeded dev dataset:");
-	console.log(`- talents: ${talent1.email}, ${talent2.email} (password: ${seedPassword})`);
-	console.log(`- employers: ${employer1.email}, ${employer2.email} (password: ${seedPassword})`);
+	console.log(
+		`- talents: ${talent1.email}, ${talent2.email} (password: ${seedPassword})`,
+	);
+	console.log(
+		`- employers: ${employer1.email}, ${employer2.email} (password: ${seedPassword})`,
+	);
 }
 
 main()
