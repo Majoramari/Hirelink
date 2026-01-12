@@ -12,18 +12,18 @@
  */
 
 import { Router } from "express";
+import applicationsRoute from "./applications.route.js";
 import authRoute from "./auth.route.js";
 import employerRoute from "./employer.route.js";
 import jobsRoute from "./jobs.route.js";
 import moderationRoute from "./moderation.route.js";
-import talentApplicationsRoute from "./talent.applications.route.js";
 import talentRoute from "./talent.route.js";
 
 const router = Router();
 
 router.use("/auth", authRoute);
 router.use("/talent", talentRoute);
-router.use("/talent", talentApplicationsRoute);
+router.use("/talent", applicationsRoute);
 router.use("/employer", employerRoute);
 router.use("/jobs", jobsRoute);
 router.use("/moderation", moderationRoute);
