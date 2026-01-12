@@ -9,8 +9,7 @@
  * - File operations use Cloudinary via `profileFile.service`.
  *
  * References:
- * - Express: https://expressjs.com/
- * - Cloudinary: https://cloudinary.com/documentation
+ * - Cloudinary: https://cloudinary.com/documentation/node_integration
  */
 
 import { talentService } from "../services/index.js";
@@ -22,7 +21,8 @@ import { fail, success } from "../utils/response.utils.js";
  * @param {import("express").Response} res
  */
 export async function updateProfile(req, res) {
-	const result = await talentService.updateProfile(req.user.id, req.body);
+	const payload = req.validated ?? req.body;
+	const result = await talentService.updateProfile(req.user.id, payload);
 	if (!result.ok) {
 		return fail({
 			res,
@@ -119,7 +119,7 @@ export async function updateFile(req, res) {
  * @param {import("express").Response} res
  */
 export async function getFile(req, res) {
-	const type = req.url.includes("avatar") ? "avatar" : "resume";
+	const type = req.path.endsWith("/avatar") ? "avatar" : "resume";
 	const result = await talentService.getFile(type, req.user.id, {
 		width: req.query.width || 200,
 		height: req.query.height || 200,
@@ -148,7 +148,7 @@ export async function getFile(req, res) {
  * @param {import("express").Response} res
  */
 export async function deleteFile(req, res) {
-	const type = req.url.includes("avatar") ? "avatar" : "resume";
+	const type = req.path.endsWith("/avatar") ? "avatar" : "resume";
 	const result = await talentService.deleteFile(type, req.user.id);
 
 	if (!result.ok) {
