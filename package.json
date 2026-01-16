@@ -16,7 +16,7 @@
 		"lint:fix": "biome lint --write .",
 		"postinstall": "npm run prisma:generate",
 		"pretest": "npm run prisma:generate",
-		"prisma": "node --env-file=.env ./node_modules/.bin/prisma",
+		"prisma": "npx prisma",
 		"prisma:generate": "npm run prisma -- generate",
 		"prisma:migrate": "npm run prisma -- migrate",
 		"prisma:seed": "npm run prisma -- db seed",
