@@ -53,6 +53,13 @@ const envSchema = z
 		GMAIL_USER: z.email().min(1, { error: "Field cannot be empty" }),
 		GMAIL_PASSWORD: z.string().min(1, { error: "Field cannot be empty" }),
 		EMAIL_VERIFICATION_EXPIRY: z.string().default("5m"),
+		EMAIL_SEND: z.preprocess((val) => {
+			if (val === undefined) {
+				return false;
+			}
+			const s = String(val).toLowerCase();
+			return s === "true" || s === "1" || s === "yes";
+		}, z.boolean()),
 		MODERATOR_EMAIL: z.email().optional(),
 		MODERATOR_PASSWORD: z.string().min(1).optional(),
 		CLOUDINARY_CLOUD_NAME: z

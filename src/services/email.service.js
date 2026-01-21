@@ -32,7 +32,7 @@ export async function sendVerificationEmail(
 ) {
 	const safeUrl = encodeURI(verificationUrl);
 
-	if (env.NODE_ENV !== "production") {
+	if (!env.EMAIL_SEND) {
 		logger.info(
 			{ to, verificationUrl: safeUrl },
 			"[dev] verification email skipped",
@@ -65,7 +65,7 @@ export async function sendSecurityAlertEmail(
 ) {
 	const safeUrl = encodeURI(passwordResetUrl);
 
-	if (env.NODE_ENV !== "production") {
+	if (!env.EMAIL_SEND) {
 		logger.warn(
 			{ to, passwordResetUrl: safeUrl },
 			"[dev] security alert email skipped",
@@ -98,7 +98,7 @@ export async function sendPasswordResetEmail(
 ) {
 	const safeUrl = encodeURI(resetUrl);
 
-	if (env.NODE_ENV !== "production") {
+	if (!env.EMAIL_SEND) {
 		logger.info(
 			{ to, resetUrl: safeUrl },
 			"[dev] password reset email skipped",
