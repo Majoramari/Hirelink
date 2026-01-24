@@ -1,7 +1,7 @@
 meta {
   name: UpdateJob
   type: http
-  seq: 6
+  seq: 4
 }
 
 put {
@@ -21,7 +21,20 @@ body:json {
     "location": "Remote",
     "jobType": "FULL_TIME",
     "experienceLevel": "JUNIOR",
-    "salary": 2500
+    "salary": 2500,
+    "requiredSkills": [
+      {
+        "name": "NodeJS",
+        "required": false
+      }
+    ],
+    "requiredLanguages": [
+      {
+        "name": "English",
+        "minimumProficiency": "INTERMEDIATE",
+        "required": true
+      }
+    ]
   }
 }
 

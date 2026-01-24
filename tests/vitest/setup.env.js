@@ -80,7 +80,7 @@ process.env.EMAIL_VERIFICATION_EXPIRY =
 	process.env.EMAIL_VERIFICATION_EXPIRY || "5m";
 
 const emailRegex =
-	/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
+	/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9-]*\.)+[A-Za-z]{2,}$/;
 if (
 	process.env.MODERATOR_EMAIL &&
 	!emailRegex.test(process.env.MODERATOR_EMAIL)

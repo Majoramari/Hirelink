@@ -1,0 +1,27 @@
+meta {
+  name: UpsertLanguage
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/talent/languages
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{talent_access_token}}
+}
+
+body:json {
+  {
+    "name": "French",
+    "proficiency": "INTERMEDIATE"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

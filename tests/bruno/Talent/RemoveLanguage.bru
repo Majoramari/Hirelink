@@ -1,0 +1,26 @@
+meta {
+  name: RemoveLanguage
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{base_url}}/talent/languages
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{talent_access_token}}
+}
+
+body:json {
+  {
+    "name": "French"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

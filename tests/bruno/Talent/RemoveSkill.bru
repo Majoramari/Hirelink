@@ -1,0 +1,26 @@
+meta {
+  name: RemoveSkill
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{base_url}}/talent/skills
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{talent_access_token}}
+}
+
+body:json {
+  {
+    "name": "TypeScript"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

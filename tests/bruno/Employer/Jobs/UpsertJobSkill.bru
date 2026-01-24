@@ -1,0 +1,27 @@
+meta {
+  name: UpsertJobSkill
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/employer/jobs/{{job_id}}/skills
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{employer_access_token}}
+}
+
+body:json {
+  {
+    "name": "TypeScript",
+    "required": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
