@@ -25,7 +25,7 @@ import prisma from "../lib/prisma.js";
 import errorUtils from "../utils/error.utils.js";
 import {result} from "../utils/response.utils.js";
 import statusCodes from "../utils/statusCodes.utils.js";
-import {getUserWithProfiles, validateRoleProfileInvariant} from "./user.service.js";
+import {getUserWithProfiles, validateRoleProfileInvariant,} from "./user.service.js";
 
 /**
  * Loads a user (including profiles) and validates the role↔profile invariant.
@@ -38,20 +38,21 @@ async function guardUserAndProfile(userId, profileKey) {
 	const user = await getUserWithProfiles(userId);
 	if (!user) {
 		return {
-			user: null, error: result({
-			ok: false,
+			user: null,
+			error: result({
+				ok: false,
 				statusCode: statusCodes.NOT_FOUND,
 				message: "user not found",
-			})
+			}),
 		};
 	}
 
 	const invariantError = validateRoleProfileInvariant(user, profileKey);
 	if (invariantError) {
-		return {user: null, error: invariantError};
+		return { user: null, error: invariantError };
 	}
 
-	return {user, error: null};
+	return { user, error: null };
 }
 
 /**
@@ -66,14 +67,15 @@ function guardFileId(user, profileKey, field) {
 	const fileId = user[profileKey]?.[field];
 	if (!fileId) {
 		return {
-			fileId: null, error: result({
+			fileId: null,
+			error: result({
 				ok: false,
 				statusCode: statusCodes.NOT_FOUND,
 				message: "file not found",
-			})
+			}),
 		};
 	}
-	return {fileId, error: null};
+	return { fileId, error: null };
 }
 
 /**
@@ -87,7 +89,7 @@ function guardFileId(user, profileKey, field) {
  */
 async function guardCloudinaryResource(fileId, resourceType) {
 	const [error] = await errorUtils(
-		cloudinary.api.resource(fileId, {resource_type: resourceType}),
+		cloudinary.api.resource(fileId, { resource_type: resourceType }),
 	);
 	if (error) {
 		return result({
@@ -115,27 +117,32 @@ async function guardCloudinaryResource(fileId, resourceType) {
  * @param {"image"|"raw"} params.resourceType
  * @returns {Promise<{ fileId: string | null, error: ReturnType<typeof result> | null }>}
  */
-async function guardProfileFileAccess({userId, profileKey, field, resourceType}) {
-	const {user, error: guardError} = await guardUserAndProfile(userId, profileKey);
+async function guardProfileFileAccess({
+	userId,
+	profileKey,
+	field,
+	resourceType,
+}) {
+	const { user, error: guardError } = await guardUserAndProfile(
+		userId,
+		profileKey,
+	);
 	if (guardError) {
-		return {fileId: null, error: guardError};
+		return { fileId: null, error: guardError };
 	}
 
-	const {fileId, error: fileError} = guardFileId(user, profileKey, field);
+	const { fileId, error: fileError } = guardFileId(user, profileKey, field);
 	if (fileError) {
-		return {fileId: null, error: fileError};
+		return { fileId: null, error: fileError };
 	}
 
 	const cloudinaryError = await guardCloudinaryResource(fileId, resourceType);
 	if (cloudinaryError) {
-		return {fileId: null, error: cloudinaryError};
+		return { fileId: null, error: cloudinaryError };
 	}
 
-	return {fileId, error: null};
+	return { fileId, error: null };
 }
-
-
-
 
 /**
  * Updates a single Cloudinary-backed file reference on a role profile.
@@ -148,14 +155,17 @@ async function guardProfileFileAccess({userId, profileKey, field, resourceType})
  * @param {"image"|"raw"} params.resourceType
  */
 export async function updateProfileFile({
-											userId,
-											profileKey,
-											field,
-											file,
-											resourceType,
-										}) {
+	userId,
+	profileKey,
+	field,
+	file,
+	resourceType,
+}) {
 	try {
-		const {user, error: guardError} = await guardUserAndProfile(userId, profileKey);
+		const { user, error: guardError } = await guardUserAndProfile(
+			userId,
+			profileKey,
+		);
 		if (guardError) {
 			return guardError;
 		}
@@ -168,7 +178,7 @@ export async function updateProfileFile({
 		}
 
 		const updated = await prisma.user.update({
-			where: {id: userId},
+			where: { id: userId },
 			data: {
 				[profileKey]: {
 					update: {
@@ -176,7 +186,7 @@ export async function updateProfileFile({
 					},
 				},
 			},
-			include: {[profileKey]: true},
+			include: { [profileKey]: true },
 		});
 
 		return result({
@@ -209,17 +219,17 @@ export async function updateProfileFile({
  * @param {number} [params.height]
  */
 export async function getProfileFileUrl({
-											userId,
-											profileKey,
-											field,
-											resourceType,
-											folder,
-											responseKey,
-											width,
-											height,
-										}) {
+	userId,
+	profileKey,
+	field,
+	resourceType,
+	folder,
+	responseKey,
+	width,
+	height,
+}) {
 	try {
-		const {fileId, error: guardError} = await guardProfileFileAccess({
+		const { fileId, error: guardError } = await guardProfileFileAccess({
 			userId,
 			profileKey,
 			field,
@@ -233,7 +243,7 @@ export async function getProfileFileUrl({
 			folder,
 			resource_type: resourceType,
 			...(resourceType === "image" && width && height
-				? {width, height, crop: "fill"}
+				? { width, height, crop: "fill" }
 				: {}),
 		});
 
@@ -241,7 +251,7 @@ export async function getProfileFileUrl({
 			ok: true,
 			statusCode: statusCodes.OK,
 			message: "file fetched",
-			payload: {[responseKey]: url},
+			payload: { [responseKey]: url },
 		});
 	} catch (err) {
 		logger.error(err);
@@ -263,13 +273,13 @@ export async function getProfileFileUrl({
  * @param {"image"|"raw"} params.resourceType
  */
 export async function deleteProfileFile({
-											userId,
-											profileKey,
-											field,
-											resourceType,
-										}) {
+	userId,
+	profileKey,
+	field,
+	resourceType,
+}) {
 	try {
-		const {fileId, error: guardError} = await guardProfileFileAccess({
+		const { fileId, error: guardError } = await guardProfileFileAccess({
 			userId,
 			profileKey,
 			field,
@@ -279,9 +289,9 @@ export async function deleteProfileFile({
 			return guardError;
 		}
 
-		await cloudinary.uploader.destroy(fileId, {resource_type: resourceType});
+		await cloudinary.uploader.destroy(fileId, { resource_type: resourceType });
 		await prisma.user.update({
-			where: {id: userId},
+			where: { id: userId },
 			data: {
 				[profileKey]: {
 					update: {
