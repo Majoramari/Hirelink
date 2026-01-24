@@ -15,8 +15,8 @@
  * - Express: https://expressjs.com/
  */
 
-import {applicationService, jobService} from "../services/index.js";
-import {fail, success} from "../utils/response.utils.js";
+import { applicationService, jobService } from "../services/index.js";
+import { fail, success } from "../utils/response.utils.js";
 
 /**
  * Lists public jobs.
@@ -24,31 +24,31 @@ import {fail, success} from "../utils/response.utils.js";
  * @param {import("express").Response} res
  */
 export async function list(req, res) {
-    const limit = req.query.limit ? Number(req.query.limit) : 20;
-    const skip = req.query.skip ? Number(req.query.skip) : 0;
-    const mode = req.query.mode ? String(req.query.mode) : "recent";
-    const result = await jobService.listTalentJobs({
-        userId: req.user.id,
-        mode,
-        limit,
-        skip,
-    });
+	const limit = req.query.limit ? Number(req.query.limit) : 20;
+	const skip = req.query.skip ? Number(req.query.skip) : 0;
+	const mode = req.query.mode ? String(req.query.mode) : "recent";
+	const result = await jobService.listTalentJobs({
+		userId: req.user.id,
+		mode,
+		limit,
+		skip,
+	});
 
-    if (!result.ok) {
-        return fail({
-            res,
-            statusCode: result.statusCode,
-            message: result.message,
-            details: result.payload,
-        });
-    }
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
 
-    return success({
-        res,
-        statusCode: result.statusCode,
-        message: result.message,
-        data: result.payload,
-    });
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
 }
 
 /**
@@ -57,23 +57,23 @@ export async function list(req, res) {
  * @param {import("express").Response} res
  */
 export async function createEmployerJob(req, res) {
-    const payload = req.validated ?? req.body;
-    const result = await jobService.createEmployerJob(req.user.id, payload);
-    if (!result.ok) {
-        return fail({
-            res,
-            statusCode: result.statusCode,
-            message: result.message,
-            details: result.payload,
-        });
-    }
+	const payload = req.validated ?? req.body;
+	const result = await jobService.createEmployerJob(req.user.id, payload);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
 
-    return success({
-        res,
-        statusCode: result.statusCode,
-        message: result.message,
-        data: result.payload,
-    });
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
 }
 
 /**
@@ -82,21 +82,21 @@ export async function createEmployerJob(req, res) {
  * @param {import("express").Response} res
  */
 export async function listEmployerJobs(req, res) {
-    const result = await jobService.listEmployerJobs(req.user.id);
-    if (!result.ok) {
-        return fail({
-            res,
-            statusCode: result.statusCode,
-            message: result.message,
-            details: result.payload,
-        });
-    }
-    return success({
-        res,
-        statusCode: result.statusCode,
-        message: result.message,
-        data: result.payload,
-    });
+	const result = await jobService.listEmployerJobs(req.user.id);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
 }
 
 /**
@@ -105,21 +105,21 @@ export async function listEmployerJobs(req, res) {
  * @param {import("express").Response} res
  */
 export async function getEmployerJob(req, res) {
-    const result = await jobService.getEmployerJob(req.user.id, req.params.jobId);
-    if (!result.ok) {
-        return fail({
-            res,
-            statusCode: result.statusCode,
-            message: result.message,
-            details: result.payload,
-        });
-    }
-    return success({
-        res,
-        statusCode: result.statusCode,
-        message: result.message,
-        data: result.payload,
-    });
+	const result = await jobService.getEmployerJob(req.user.id, req.params.jobId);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
 }
 
 /**
@@ -128,26 +128,118 @@ export async function getEmployerJob(req, res) {
  * @param {import("express").Response} res
  */
 export async function updateEmployerJob(req, res) {
-    const payload = req.validated ?? req.body;
-    const result = await jobService.updateEmployerJob(
-        req.user.id,
-        req.params.jobId,
-        payload,
-    );
-    if (!result.ok) {
-        return fail({
-            res,
-            statusCode: result.statusCode,
-            message: result.message,
-            details: result.payload,
-        });
-    }
-    return success({
-        res,
-        statusCode: result.statusCode,
-        message: result.message,
-        data: result.payload,
-    });
+	const payload = req.validated ?? req.body;
+	const result = await jobService.updateEmployerJob(
+		req.user.id,
+		req.params.jobId,
+		payload,
+	);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
+}
+
+export async function upsertEmployerJobSkill(req, res) {
+	const payload = req.validated ?? req.body;
+	const result = await jobService.upsertEmployerJobSkill(
+		req.user.id,
+		req.params.jobId,
+		payload,
+	);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
+}
+
+export async function removeEmployerJobSkill(req, res) {
+	const payload = req.validated ?? req.body;
+	const result = await jobService.removeEmployerJobSkill(
+		req.user.id,
+		req.params.jobId,
+		payload,
+	);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
+}
+
+export async function upsertEmployerJobLanguage(req, res) {
+	const payload = req.validated ?? req.body;
+	const result = await jobService.upsertEmployerJobLanguage(
+		req.user.id,
+		req.params.jobId,
+		payload,
+	);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
+}
+
+export async function removeEmployerJobLanguage(req, res) {
+	const payload = req.validated ?? req.body;
+	const result = await jobService.removeEmployerJobLanguage(
+		req.user.id,
+		req.params.jobId,
+		payload,
+	);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
 }
 
 /**
@@ -156,24 +248,24 @@ export async function updateEmployerJob(req, res) {
  * @param {import("express").Response} res
  */
 export async function deleteEmployerJob(req, res) {
-    const result = await jobService.deleteEmployerJob(
-        req.user.id,
-        req.params.jobId,
-    );
-    if (!result.ok) {
-        return fail({
-            res,
-            statusCode: result.statusCode,
-            message: result.message,
-            details: result.payload,
-        });
-    }
-    return success({
-        res,
-        statusCode: result.statusCode,
-        message: result.message,
-        data: result.payload,
-    });
+	const result = await jobService.deleteEmployerJob(
+		req.user.id,
+		req.params.jobId,
+	);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
 }
 
 /**
@@ -182,23 +274,23 @@ export async function deleteEmployerJob(req, res) {
  * @param {import("express").Response} res
  */
 export async function get(req, res) {
-    const result = await jobService.getPublicJob(req.params.jobId);
+	const result = await jobService.getPublicJob(req.params.jobId);
 
-    if (!result.ok) {
-        return fail({
-            res,
-            statusCode: result.statusCode,
-            message: result.message,
-            details: result.payload,
-        });
-    }
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
 
-    return success({
-        res,
-        statusCode: result.statusCode,
-        message: result.message,
-        data: result.payload,
-    });
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
 }
 
 /**
@@ -207,26 +299,26 @@ export async function get(req, res) {
  * @param {import("express").Response} res
  */
 export async function apply(req, res) {
-    const payload = req.validated ?? req.body;
-    const result = await applicationService.applyToJob(
-        req.user.id,
-        req.params.jobId,
-        payload,
-    );
+	const payload = req.validated ?? req.body;
+	const result = await applicationService.applyToJob(
+		req.user.id,
+		req.params.jobId,
+		payload,
+	);
 
-    if (!result.ok) {
-        return fail({
-            res,
-            statusCode: result.statusCode,
-            message: result.message,
-            details: result.payload,
-        });
-    }
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
 
-    return success({
-        res,
-        statusCode: result.statusCode,
-        message: result.message,
-        data: result.payload,
-    });
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
 }

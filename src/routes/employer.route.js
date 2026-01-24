@@ -30,13 +30,22 @@ import validate from "../middleware/validate.js";
 import { employerProfileSchema } from "../validators/employer.validator.js";
 import {
 	createJobSchema,
+	removeJobLanguageSchema,
+	removeJobSkillSchema,
 	updateApplicationStatusSchema,
 	updateJobSchema,
+	upsertJobLanguageSchema,
+	upsertJobSkillSchema,
 } from "../validators/jobs.validator.js";
 
 const router = Router();
 
-router.get("/profile", requireAuth, requireRole("EMPLOYER"), authController.getCurrent);
+router.get(
+	"/profile",
+	requireAuth,
+	requireRole("EMPLOYER"),
+	authController.getCurrent,
+);
 router.put(
 	"/profile",
 	requireAuth,
@@ -52,7 +61,12 @@ router.put(
 	uploadAvatar.single("logo"),
 	employerController.updateLogo,
 );
-router.get("/logo", requireAuth, requireRole("EMPLOYER"), employerController.getLogo);
+router.get(
+	"/logo",
+	requireAuth,
+	requireRole("EMPLOYER"),
+	employerController.getLogo,
+);
 router.delete(
 	"/logo",
 	requireAuth,
@@ -85,6 +99,36 @@ router.put(
 	requireRole("EMPLOYER"),
 	validate(updateJobSchema),
 	jobsController.updateEmployerJob,
+);
+
+router.post(
+	"/jobs/:jobId/skills",
+	requireAuth,
+	requireRole("EMPLOYER"),
+	validate(upsertJobSkillSchema),
+	jobsController.upsertEmployerJobSkill,
+);
+router.delete(
+	"/jobs/:jobId/skills",
+	requireAuth,
+	requireRole("EMPLOYER"),
+	validate(removeJobSkillSchema),
+	jobsController.removeEmployerJobSkill,
+);
+
+router.post(
+	"/jobs/:jobId/languages",
+	requireAuth,
+	requireRole("EMPLOYER"),
+	validate(upsertJobLanguageSchema),
+	jobsController.upsertEmployerJobLanguage,
+);
+router.delete(
+	"/jobs/:jobId/languages",
+	requireAuth,
+	requireRole("EMPLOYER"),
+	validate(removeJobLanguageSchema),
+	jobsController.removeEmployerJobLanguage,
 );
 router.delete(
 	"/jobs/:jobId",
