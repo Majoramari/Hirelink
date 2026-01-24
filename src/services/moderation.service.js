@@ -16,20 +16,26 @@
  */
 
 import prisma from "../lib/prisma.js";
-import { result } from "../utils/response.utils.js";
+import {result} from "../utils/response.utils.js";
 import statusCodes from "../utils/statusCodes.utils.js";
-import { deleteUser as deleteUserAccount } from "./user.service.js";
+import {deleteUser as deleteUserAccount} from "./user.service.js";
 
 export async function getStats() {
-	const [usersTotal, talentsTotal, employersTotal, moderatorsTotal, jobsTotal, applicationsTotal] =
-		await Promise.all([
-			prisma.user.count(),
-			prisma.user.count({ where: { role: "TALENT" } }),
-			prisma.user.count({ where: { role: "EMPLOYER" } }),
-			prisma.user.count({ where: { role: "MODERATOR" } }),
-			prisma.job.count(),
-			prisma.application.count(),
-		]);
+	const [
+		usersTotal,
+		talentsTotal,
+		employersTotal,
+		moderatorsTotal,
+		jobsTotal,
+		applicationsTotal,
+	] = await Promise.all([
+		prisma.user.count(),
+		prisma.user.count({ where: { role: "TALENT" } }),
+		prisma.user.count({ where: { role: "EMPLOYER" } }),
+		prisma.user.count({ where: { role: "MODERATOR" } }),
+		prisma.job.count(),
+		prisma.application.count(),
+	]);
 
 	const [usersActive, usersInactive] = await Promise.all([
 		prisma.user.count({ where: { isActive: true } }),
@@ -152,7 +158,10 @@ export async function listJobs({ limit = 20, skip = 0 }) {
 }
 
 export async function deleteJob(jobId) {
-	const existing = await prisma.job.findUnique({ where: { id: jobId }, select: { id: true } });
+	const existing = await prisma.job.findUnique({
+		where: { id: jobId },
+		select: { id: true },
+	});
 	if (!existing) {
 		return result({
 			ok: false,
