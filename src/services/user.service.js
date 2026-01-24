@@ -8,9 +8,9 @@
  *
  */
 
-import {z} from "zod";
+import { z } from "zod";
 import prisma from "../lib/prisma.js";
-import {result} from "../utils/response.utils.js";
+import { result } from "../utils/response.utils.js";
 import statusCodes from "../utils/statusCodes.utils.js";
 
 /**

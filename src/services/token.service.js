@@ -70,7 +70,7 @@ export function generateRefreshToken(userId) {
 export async function verifyAccessToken(token) {
 	try {
 		return jwt.verify(token, env.JWT_ACCESS_SECRET);
-	} catch (err) {
+	} catch (_err) {
 		return null;
 	}
 }
@@ -83,7 +83,7 @@ export async function verifyAccessToken(token) {
 export async function verifyRefreshToken(token) {
 	try {
 		return jwt.verify(token, env.JWT_REFRESH_SECRET);
-	} catch (err) {
+	} catch (_err) {
 		return null;
 	}
 }

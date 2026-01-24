@@ -16,9 +16,9 @@
  */
 
 import prisma from "../lib/prisma.js";
-import {result} from "../utils/response.utils.js";
+import { result } from "../utils/response.utils.js";
 import statusCodes from "../utils/statusCodes.utils.js";
-import {deleteUser as deleteUserAccount} from "./user.service.js";
+import { deleteUser as deleteUserAccount } from "./user.service.js";
 
 export async function getStats() {
 	const [

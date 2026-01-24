@@ -19,13 +19,16 @@
  * - Cloudinary delivery URLs: https://cloudinary.com/documentation/image_transformations
  */
 
-import {cloudinary} from "../config/cloudinary.js";
+import { cloudinary } from "../config/cloudinary.js";
 import logger from "../lib/logger.js";
 import prisma from "../lib/prisma.js";
 import errorUtils from "../utils/error.utils.js";
-import {result} from "../utils/response.utils.js";
+import { result } from "../utils/response.utils.js";
 import statusCodes from "../utils/statusCodes.utils.js";
-import {getUserWithProfiles, validateRoleProfileInvariant,} from "./user.service.js";
+import {
+	getUserWithProfiles,
+	validateRoleProfileInvariant,
+} from "./user.service.js";
 
 /**
  * Loads a user (including profiles) and validates the role↔profile invariant.

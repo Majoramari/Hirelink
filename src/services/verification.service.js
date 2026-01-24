@@ -13,7 +13,7 @@
 
 import env from "../config/env.js";
 import prisma from "../lib/prisma.js";
-import {generateToken, parseExpiry} from "../utils/general.utils.js";
+import { generateToken, parseExpiry } from "../utils/general.utils.js";
 
 /**
  * Generates and stores a new verification token for a user.

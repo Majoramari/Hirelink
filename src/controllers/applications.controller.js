@@ -11,8 +11,8 @@
  * - Controllers only return standard API responses.
  */
 
-import {applicationService} from "../services/index.js";
-import {fail, success} from "../utils/response.utils.js";
+import { applicationService } from "../services/index.js";
+import { fail, success } from "../utils/response.utils.js";
 
 /**
  * Lists applications for the authenticated talent.

@@ -11,8 +11,8 @@
  * - Cloudinary: https://cloudinary.com/documentation
  */
 
-import {employerService} from "../services/index.js";
-import {fail, success} from "../utils/response.utils.js";
+import { employerService } from "../services/index.js";
+import { fail, success } from "../utils/response.utils.js";
 
 /**
  * Updates the authenticated employer profile.
