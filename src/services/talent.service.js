@@ -225,6 +225,31 @@ async function listTalentLanguages(tx, talentId) {
 	}));
 }
 
+async function listTalentCertificates(tx, talentId) {
+	const rows = await tx.talentCertificate.findMany({
+		where: { talentId },
+		select: {
+			id: true,
+			name: true,
+			issuer: true,
+			credentialUrl: true,
+			credentialId: true,
+			issueDate: true,
+			expiryDate: true,
+		},
+		orderBy: { createdAt: "asc" },
+	});
+	return rows.map((r) => ({
+		certificateId: r.id,
+		name: r.name,
+		issuer: r.issuer,
+		credentialUrl: r.credentialUrl,
+		credentialId: r.credentialId,
+		issueDate: r.issueDate,
+		expiryDate: r.expiryDate,
+	}));
+}
+
 export async function upsertSkill(userId, payload) {
 	const guard = await getTalent(userId);
 	if (!guard.ok) {
@@ -617,6 +642,188 @@ export async function setLanguages(userId, languages) {
 		statusCode: statusCodes.OK,
 		message: "talent languages updated",
 		payload,
+	});
+}
+
+export async function setCertificates(userId, certificates) {
+	const guard = await getTalent(userId);
+	if (!guard.ok) {
+		return guard.result;
+	}
+
+	const talentId = await getTalentIdByUserId(userId);
+	if (!talentId) {
+		return result({
+			ok: false,
+			statusCode: statusCodes.NOT_FOUND,
+			message: "talent not found",
+		});
+	}
+
+	const uniqueByKey = new Map();
+	for (const c of certificates || []) {
+		const name = c?.name?.trim();
+		const issuer = c?.issuer?.trim();
+		if (!name || !issuer) {
+			continue;
+		}
+		const key = `${name.toLowerCase()}|${issuer.toLowerCase()}|${c?.credentialId || ""}|${c?.credentialUrl || ""}`;
+		if (!uniqueByKey.has(key)) {
+			uniqueByKey.set(key, {
+				name,
+				issuer,
+				credentialUrl: c?.credentialUrl,
+				credentialId: c?.credentialId,
+				issueDate: c?.issueDate,
+				expiryDate: c?.expiryDate,
+			});
+		}
+	}
+	const normalized = Array.from(uniqueByKey.values());
+
+	const payload = await prisma.$transaction(async (tx) => {
+		await tx.talentCertificate.deleteMany({ where: { talentId } });
+		if (normalized.length === 0) {
+			return { certificates: [] };
+		}
+
+		await tx.talentCertificate.createMany({
+			data: normalized.map((c) => ({
+				id: generateUlid(),
+				talentId,
+				name: c.name,
+				issuer: c.issuer,
+				credentialUrl: c.credentialUrl,
+				credentialId: c.credentialId,
+				issueDate: c.issueDate,
+				expiryDate: c.expiryDate,
+			})),
+		});
+
+		return { certificates: await listTalentCertificates(tx, talentId) };
+	});
+
+	return result({
+		ok: true,
+		statusCode: statusCodes.OK,
+		message: "talent certificates updated",
+		payload,
+	});
+}
+
+export async function upsertCertificate(userId, payload) {
+	const guard = await getTalent(userId);
+	if (!guard.ok) {
+		return guard.result;
+	}
+
+	const talentId = await getTalentIdByUserId(userId);
+	if (!talentId) {
+		return result({
+			ok: false,
+			statusCode: statusCodes.NOT_FOUND,
+			message: "talent not found",
+		});
+	}
+
+	if (payload?.certificateId) {
+		const updated = await prisma.$transaction(async (tx) => {
+			const res = await tx.talentCertificate.updateMany({
+				where: { id: payload.certificateId, talentId },
+				data: {
+					name: payload.name,
+					issuer: payload.issuer,
+					credentialUrl: payload.credentialUrl,
+					credentialId: payload.credentialId,
+					issueDate: payload.issueDate,
+					expiryDate: payload.expiryDate,
+				},
+			});
+			if (res.count === 0) {
+				return { ok: false };
+			}
+			return { certificates: await listTalentCertificates(tx, talentId) };
+		});
+
+		if (updated.ok === false) {
+			return result({
+				ok: false,
+				statusCode: statusCodes.NOT_FOUND,
+				message: "certificate not found",
+			});
+		}
+
+		return result({
+			ok: true,
+			statusCode: statusCodes.OK,
+			message: "talent certificate updated",
+			payload: updated,
+		});
+	}
+
+	const created = await prisma.$transaction(async (tx) => {
+		await tx.talentCertificate.create({
+			data: {
+				id: generateUlid(),
+				talentId,
+				name: payload.name,
+				issuer: payload.issuer,
+				credentialUrl: payload.credentialUrl,
+				credentialId: payload.credentialId,
+				issueDate: payload.issueDate,
+				expiryDate: payload.expiryDate,
+			},
+		});
+
+		return { certificates: await listTalentCertificates(tx, talentId) };
+	});
+
+	return result({
+		ok: true,
+		statusCode: statusCodes.OK,
+		message: "talent certificate updated",
+		payload: created,
+	});
+}
+
+export async function removeCertificate(userId, payload) {
+	const guard = await getTalent(userId);
+	if (!guard.ok) {
+		return guard.result;
+	}
+
+	const talentId = await getTalentIdByUserId(userId);
+	if (!talentId) {
+		return result({
+			ok: false,
+			statusCode: statusCodes.NOT_FOUND,
+			message: "talent not found",
+		});
+	}
+
+	const updated = await prisma.$transaction(async (tx) => {
+		const res = await tx.talentCertificate.deleteMany({
+			where: { id: payload.certificateId, talentId },
+		});
+		if (res.count === 0) {
+			return { ok: false };
+		}
+		return { certificates: await listTalentCertificates(tx, talentId) };
+	});
+
+	if (updated.ok === false) {
+		return result({
+			ok: false,
+			statusCode: statusCodes.NOT_FOUND,
+			message: "certificate not found",
+		});
+	}
+
+	return result({
+		ok: true,
+		statusCode: statusCodes.OK,
+		message: "talent certificate removed",
+		payload: updated,
 	});
 }
 
