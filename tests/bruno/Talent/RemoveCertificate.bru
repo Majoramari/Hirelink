@@ -1,0 +1,26 @@
+meta {
+  name: RemoveCertificate
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{base_url}}/talent/certificates
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{talent_access_token}}
+}
+
+body:json {
+  {
+    "certificateId": {{certificate_id}}
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

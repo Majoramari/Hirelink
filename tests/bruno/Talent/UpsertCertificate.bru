@@ -1,0 +1,35 @@
+meta {
+  name: UpsertCertificate
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base_url}}/talent/certificates
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{talent_access_token}}
+}
+
+body:json {
+  {
+    "name": "Google Cloud Associate",
+    "issuer": "Google",
+    "credentialUrl": "https://example.com/cert/1"
+  }
+}
+
+script:post-response {
+  const certificateId = res.body?.data?.certificates?.[0]?.certificateId;
+  if (certificateId) {
+    bru.setEnvVar("certificate_id", JSON.stringify(certificateId));
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

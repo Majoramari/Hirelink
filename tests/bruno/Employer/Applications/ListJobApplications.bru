@@ -19,6 +19,16 @@ script:post-response {
   if (firstId) {
     bru.setEnvVar("application_id", firstId);
   }
+
+	const firstApp = res.body?.data?.[0];
+	if (firstApp?.talent) {
+		const certs = firstApp.talent.certificates;
+		if (!Array.isArray(certs)) {
+			throw new Error(
+				"Expected res.body.data[0].talent.certificates to be an array",
+			);
+		}
+	}
 }
 
 settings {

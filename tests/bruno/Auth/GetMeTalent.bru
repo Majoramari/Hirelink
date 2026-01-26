@@ -56,6 +56,29 @@ script:post-response {
       throw new Error("Expected each skill to have a string level");
     }
   }
+
+	const certificates = profile.certificates;
+	if (!Array.isArray(certificates)) {
+		throw new Error("Expected data.talentProfile.certificates to be an array");
+	}
+
+	const expectedCertificateIdRaw = bru.getEnvVar("certificate_id");
+	if (expectedCertificateIdRaw) {
+		let expectedCertificateId;
+		try {
+			expectedCertificateId = JSON.parse(expectedCertificateIdRaw);
+		} catch {
+			expectedCertificateId = expectedCertificateIdRaw;
+		}
+		const found = certificates.some(
+			(c) => c?.certificateId === expectedCertificateId,
+		);
+		if (!found) {
+			throw new Error(
+				"Expected data.talentProfile.certificates to include the env var certificate_id",
+			);
+		}
+	}
 }
 
 settings {

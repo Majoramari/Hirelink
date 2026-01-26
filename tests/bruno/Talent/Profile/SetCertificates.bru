@@ -1,0 +1,39 @@
+meta {
+  name: SetCertificates
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{base_url}}/talent/certificates
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{talent_access_token}}
+}
+
+body:json {
+  {
+    "certificates": [
+      {
+        "name": "AWS Certified Developer",
+        "issuer": "Amazon",
+        "credentialId": "ABC-123"
+      }
+    ]
+  }
+}
+
+script:post-response {
+  const certificateId = res.body?.data?.certificates?.[0]?.certificateId;
+  if (certificateId) {
+    bru.setEnvVar("certificate_id", JSON.stringify(certificateId));
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
