@@ -160,6 +160,66 @@ export async function removeLanguage(req, res) {
 	});
 }
 
+export async function setCertificates(req, res) {
+	const result = await talentService.setCertificates(
+		req.user.id,
+		req.validated.certificates,
+	);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
+}
+
+export async function upsertCertificate(req, res) {
+	const payload = req.validated ?? req.body;
+	const result = await talentService.upsertCertificate(req.user.id, payload);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
+}
+
+export async function removeCertificate(req, res) {
+	const payload = req.validated ?? req.body;
+	const result = await talentService.removeCertificate(req.user.id, payload);
+	if (!result.ok) {
+		return fail({
+			res,
+			statusCode: result.statusCode,
+			message: result.message,
+			details: result.payload,
+		});
+	}
+	return success({
+		res,
+		statusCode: result.statusCode,
+		message: result.message,
+		data: result.payload,
+	});
+}
+
 /**
  * Uploads/updates a talent profile file (avatar/resume).
  * @param {import("express").Request} req
