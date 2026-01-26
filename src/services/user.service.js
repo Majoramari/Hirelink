@@ -88,6 +88,18 @@ export async function findUser(identifier) {
 									},
 									orderBy: { createdAt: "asc" },
 								},
+								certificates: {
+									select: {
+										id: true,
+										name: true,
+										issuer: true,
+										credentialUrl: true,
+										credentialId: true,
+										issueDate: true,
+										expiryDate: true,
+									},
+									orderBy: { createdAt: "asc" },
+								},
 							},
 						},
 					}
@@ -109,6 +121,17 @@ export async function findUser(identifier) {
 				proficiency: r.proficiency,
 			}),
 		);
+		user.talentProfile.certificates = (
+			user.talentProfile.certificates || []
+		).map((c) => ({
+			certificateId: c.id,
+			name: c.name,
+			issuer: c.issuer,
+			credentialUrl: c.credentialUrl,
+			credentialId: c.credentialId,
+			issueDate: c.issueDate,
+			expiryDate: c.expiryDate,
+		}));
 	}
 
 	return user;
