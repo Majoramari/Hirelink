@@ -53,14 +53,65 @@ export async function findUser(identifier) {
 		return null;
 	}
 
-	return prisma.user.findUnique({
+	const user = await prisma.user.findUnique({
 		where: { id: identifier },
 		select: {
 			...baseSelect,
-			...(roleRow.role === "TALENT" ? { talentProfile: true } : {}),
+			...(roleRow.role === "TALENT"
+				? {
+						talentProfile: {
+							select: {
+								id: true,
+								userId: true,
+								firstName: true,
+								lastName: true,
+								headline: true,
+								bio: true,
+								location: true,
+								avatarPublicId: true,
+								resumePublicId: true,
+								createdAt: true,
+								updatedAt: true,
+								skills: {
+									select: {
+										skillId: true,
+										level: true,
+										skill: { select: { name: true } },
+									},
+									orderBy: { createdAt: "asc" },
+								},
+								languages: {
+									select: {
+										languageId: true,
+										proficiency: true,
+										language: { select: { name: true } },
+									},
+									orderBy: { createdAt: "asc" },
+								},
+							},
+						},
+					}
+				: {}),
 			...(roleRow.role === "EMPLOYER" ? { employerProfile: true } : {}),
 		},
 	});
+
+	if (roleRow.role === "TALENT" && user?.talentProfile) {
+		user.talentProfile.skills = (user.talentProfile.skills || []).map((r) => ({
+			skillId: r.skillId,
+			name: r.skill?.name,
+			level: r.level,
+		}));
+		user.talentProfile.languages = (user.talentProfile.languages || []).map(
+			(r) => ({
+				languageId: r.languageId,
+				name: r.language?.name,
+				proficiency: r.proficiency,
+			}),
+		);
+	}
+
+	return user;
 }
 
 /**

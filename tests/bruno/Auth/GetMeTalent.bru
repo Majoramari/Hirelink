@@ -14,6 +14,50 @@ headers {
   Authorization: Bearer {{talent_access_token}}
 }
 
+script:post-response {
+  const profile = res.body?.data?.talentProfile;
+  if (!profile) {
+    throw new Error("Expected response to include data.talentProfile");
+  }
+
+  const skills = profile.skills;
+  if (!Array.isArray(skills)) {
+    throw new Error("Expected data.talentProfile.skills to be an array");
+  }
+
+	const expectedSkillIdRaw = bru.getEnvVar("skill_id");
+	if (expectedSkillIdRaw) {
+		let expectedSkillId;
+		try {
+			expectedSkillId = JSON.parse(expectedSkillIdRaw);
+		} catch {
+			expectedSkillId = expectedSkillIdRaw;
+		}
+
+		const found = skills.some((s) => s?.skillId === expectedSkillId);
+		if (!found) {
+			throw new Error(
+				"Expected data.talentProfile.skills to include the env var skill_id",
+			);
+		}
+	}
+
+  for (const s of skills) {
+    if (!s || typeof s !== "object") {
+      throw new Error("Expected each skill to be an object");
+    }
+    if (!s.skillId || typeof s.skillId !== "string") {
+      throw new Error("Expected each skill to have a string skillId");
+    }
+    if (!s.name || typeof s.name !== "string") {
+      throw new Error("Expected each skill to have a string name");
+    }
+    if (!s.level || typeof s.level !== "string") {
+      throw new Error("Expected each skill to have a string level");
+    }
+  }
+}
+
 settings {
   encodeUrl: true
   timeout: 0
