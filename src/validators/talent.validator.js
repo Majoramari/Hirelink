@@ -44,6 +44,14 @@ const talentLanguageIdentifierSchema = z
 		message: "languageId or name is required",
 	});
 
+const talentCertificateIdentifierSchema = z
+	.object({
+		certificateId: z
+			.string({ required_error: "certificateId is required" })
+			.min(1, { message: "certificateId is required" }),
+	})
+	.strict();
+
 /**
  * Zod schema for updating a talent profile.
  */
@@ -129,3 +137,64 @@ export const upsertTalentLanguageSchema = z
 	});
 
 export const removeTalentLanguageSchema = talentLanguageIdentifierSchema;
+
+const certificatePayloadSchema = z
+	.object({
+		name: z
+			.string({ required_error: "certificate name is required" })
+			.min(1, { message: "certificate name is required" }),
+		issuer: z
+			.string({ required_error: "certificate issuer is required" })
+			.min(1, { message: "certificate issuer is required" }),
+		credentialUrl: z
+			.string({ invalid_type_error: "credentialUrl must be a string" })
+			.url({ message: "credentialUrl must be a valid url" })
+			.optional(),
+		credentialId: z
+			.string({ invalid_type_error: "credentialId must be a string" })
+			.min(1, { message: "credentialId cannot be empty" })
+			.optional(),
+		issueDate: z.coerce
+			.date({ message: "issueDate must be a valid date" })
+			.optional(),
+		expiryDate: z.coerce
+			.date({ message: "expiryDate must be a valid date" })
+			.optional(),
+	})
+	.strict();
+
+export const talentCertificatesSchema = z
+	.object({
+		certificates: z.array(certificatePayloadSchema).default([]),
+	})
+	.strict();
+
+export const upsertTalentCertificateSchema = z
+	.object({
+		certificateId: z
+			.string({ invalid_type_error: "certificateId must be a string" })
+			.min(1, { message: "certificateId cannot be empty" })
+			.optional(),
+		name: z
+			.string({ required_error: "certificate name is required" })
+			.min(1, { message: "certificate name is required" }),
+		issuer: z
+			.string({ required_error: "certificate issuer is required" })
+			.min(1, { message: "certificate issuer is required" }),
+		credentialUrl: z
+			.url({ message: "credentialUrl must be a valid url" })
+			.optional(),
+		credentialId: z
+			.string({ invalid_type_error: "credentialId must be a string" })
+			.min(1, { message: "credentialId cannot be empty" })
+			.optional(),
+		issueDate: z.coerce
+			.date({ message: "issueDate must be a valid date" })
+			.optional(),
+		expiryDate: z.coerce
+			.date({ message: "expiryDate must be a valid date" })
+			.optional(),
+	})
+	.strict();
+
+export const removeTalentCertificateSchema = talentCertificateIdentifierSchema;
