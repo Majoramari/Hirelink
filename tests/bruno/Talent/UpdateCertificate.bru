@@ -1,0 +1,39 @@
+meta {
+  name: UpdateCertificate
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{base_url}}/talent/certificates
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{talent_access_token}}
+}
+
+body:json {
+  {
+    "certificateId": {{certificate_id}},
+    "name": "AWS Certified Developer",
+    "issuer": "Amazon",
+    "credentialId": "UPDATED-123",
+    "credentialUrl": "https://example.com/cert/updated"
+  }
+}
+
+script:post-response {
+  const certificateId = res.body?.data?.certificates?.[0]?.certificateId;
+  if (certificateId) {
+    bru.setEnvVar("certificate_id", JSON.stringify(certificateId));
+  }
+  bru.setEnvVar("certificate_credential_id", JSON.stringify("UPDATED-123"));
+  bru.setEnvVar("certificate_credential_url", JSON.stringify("https://example.com/cert/updated"));
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -78,6 +78,43 @@ script:post-response {
 				"Expected data.talentProfile.certificates to include the env var certificate_id",
 			);
 		}
+
+		const expectedCredentialIdRaw = bru.getEnvVar("certificate_credential_id");
+		const expectedCredentialUrlRaw = bru.getEnvVar("certificate_credential_url");
+		if (expectedCredentialIdRaw || expectedCredentialUrlRaw) {
+			let expectedCredentialId = expectedCredentialIdRaw;
+			let expectedCredentialUrl = expectedCredentialUrlRaw;
+			try {
+				if (expectedCredentialIdRaw) {
+					expectedCredentialId = JSON.parse(expectedCredentialIdRaw);
+				}
+				if (expectedCredentialUrlRaw) {
+					expectedCredentialUrl = JSON.parse(expectedCredentialUrlRaw);
+				}
+			} catch {
+				// keep raw
+			}
+
+			const cert = certificates.find(
+				(c) => c?.certificateId === expectedCertificateId,
+			);
+			if (!cert) {
+				throw new Error("Expected certificate to exist");
+			}
+			if (expectedCredentialIdRaw && cert.credentialId !== expectedCredentialId) {
+				throw new Error(
+					"Expected certificate credentialId to match certificate_credential_id",
+				);
+			}
+			if (
+				expectedCredentialUrlRaw &&
+				cert.credentialUrl !== expectedCredentialUrl
+			) {
+				throw new Error(
+					"Expected certificate credentialUrl to match certificate_credential_url",
+				);
+			}
+		}
 	}
 }
 
