@@ -31,6 +31,7 @@ import { fail } from "../utils/response.utils.js";
 import httpLogMiddleware from "./httpLog.js";
 
 const isProd = env.NODE_ENV === "production";
+const allowedOrigins = new Set([...env.ALLOWED_ORIGINS, env.FRONTEND_URL]);
 
 function haltOnTimedout(req, _res, next) {
 	if (req.timedout) {
@@ -60,7 +61,7 @@ function enforceAllowedOrigin(req, res, next) {
 		return next();
 	}
 
-	if (env.ALLOWED_ORIGINS.includes(origin)) {
+	if (allowedOrigins.has(origin)) {
 		return next();
 	}
 
@@ -107,32 +108,28 @@ export default function applyGlobalMiddleware(app) {
 	);
 
 	// --- CORS ---
-	app.use(
-		cors({
-			credentials: true,
-			origin: (origin, callback) => {
-				// Allow requests with no origin (for example, Postman or same-origin requests).
-				if (!origin) {
-					return callback(null, true);
-				}
-
-				// Check whether the origin is in the list of allowed origins.
-				if (env.ALLOWED_ORIGINS.includes(origin)) {
-					return callback(null, true);
-				}
-
-				// In production, block all other origins.
-				// Prefer returning false (avoid turning CORS rejections into 5xx errors).
-				if (env.NODE_ENV === "production") {
-					return callback(null, false);
-				}
-
-				// In development, allow unknown origins for convenience.
+	const corsOptions = {
+		credentials: true,
+		origin: (origin, callback) => {
+			if (!origin) {
 				return callback(null, true);
-			},
-			optionsSuccessStatus: 200,
-		}),
-	);
+			}
+
+			if (allowedOrigins.has(origin)) {
+				return callback(null, true);
+			}
+
+			if (env.NODE_ENV === "production") {
+				return callback(null, false);
+			}
+
+			return callback(null, true);
+		},
+		optionsSuccessStatus: 200,
+	};
+
+	app.use(cors(corsOptions));
+	app.options(/.*/, cors(corsOptions));
 	app.use(enforceAllowedOrigin);
 
 	// --- Rate limiting ---
